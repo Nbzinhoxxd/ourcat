@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Álbum da Gatinha</title>
+  <style>
+    body {
+      margin: 0;
+      background: #ffe6f0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 20px;
+      color: #d63384;
+      font-size: 2.5em;
+    }
+
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .album {
+      background: white;
+      border-radius: 15px;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .album img.main {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .album.active img.main {
+      width: 400px;
+      height: 400px;
+      display: block;
+    }
+
+    .sub-gallery {
+      display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .album.active .sub-gallery {
+      display: flex;
+    }
+
+    .sub-gallery img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .gallery.active-view .album:not(.active) {
+      display: none;
+    }
+
+    .gallery.active-view {
+      justify-content: center;
+    }
+
+    .back-button {
+      display: none;
+      background: #d63384;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .album.active .back-button {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .paw {
+      position: fixed;
+      font-size: 24px;
+      opacity: 0.7;
+      animation: floatPaw 10s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes floatPaw {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-100vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 1.2em;
+      color: #b30059;
+    }
+
+    .memory-book {
+      margin: 20px auto;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .memory-book h2 {
+      color: #d63384;
+      font-size: 1.5em;
+    }
+
+    .memory-book textarea {
+      width: 100%;
+      height: 100px;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+
+    .memory-book button {
+      background: #d63384;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .memory-book #memories p {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px 0;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .memory-book #memories p span {
+      font-size: 0.9em;
+      color: #b30059;
+      display: block;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .album img.main {
+        width: 150px;
+        height: 150px;
+      }
+      .album.active img.main {
+        width: 300px;
+        height: 300px;
+      }
+      .sub-gallery img {
+        width: 80px;
+        height: 80px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Para você, com todo meu amor... Miauzinho eterno</h1>
+  <div class="gallery" id="gallery"></div>
+
+  <div class="memory-book">
+    <h2>Escreva para sua gatinha</h2>
+    <textarea id="memory" placeholder="Quer deixar uma mensagem para ela?"></textarea>
+    <button onclick="saveMemory()">Salvar</button>
+    <button id="clear-memories" onclick="clearMemories()" style="display: none;">Limpar Memórias</button>
+    <div id="memories"></div>
+  </div>
+
+  <div class="footer">
+    <p>"Eu te amo, mamãe... Obrigada por tudo que me deu. Vou miar sempre por você, onde eu estiver."</p>
+  </div>
+
+  <script>
+    // 🐾 Patinhas flutuando
+    for (let i = 0; i < 30; i++) {
+      const paw = document.createElement('div');
+      paw.className = 'paw';
+      paw.innerText = '🐾';
+      paw.style.left = Math.random() * 100 + 'vw';
+      paw.style.top = Math.random() * 100 + 'vh';
+      paw.style.animationDuration = (5 + Math.random() * 5) + 's';
+      document.body.appendChild(paw);
+    }
+
+    const gallery = document.getElementById('gallery');
+    const placeholderImage = 'https://via.placeholder.com/200/ffe6f0/333?text=Gatinha';
+
+    for (let g = 0; g < 7; g++) {
+      const album = document.createElement('div');
+      album.className = 'album';
+      album.setAttribute('onclick', 'toggleGallery(this)');
+
+      const mainImgIndex = g * 6 + 1;
+      const mainImg = document.createElement('img');
+      mainImg.className = 'main';
+      mainImg.src = `imagens/gatinha_${mainImgIndex}.jpg`;
+      mainImg.alt = `Foto principal da gatinha ${mainImgIndex}`;
+      mainImg.dataset.original = mainImg.src;
+      mainImg.onerror = function() { this.src = placeholderImage; };
+      album.appendChild(mainImg);
+
+      const subGallery = document.createElement('div');
+      subGallery.className = 'sub-gallery';
+
+      for (let i = 1; i <= 5; i++) {
+        const img = document.createElement('img');
+        const index = g * 6 + i + 1;
+        img.src = `imagens/gatinha_${index}.jpg`;
+        img.alt = `Foto da gatinha em momento especial ${index}`;
+        img.onerror = function() { this.src = placeholderImage; };
+        img.onclick = function(e) {
+          e.stopPropagation();
+          const currentMain = album.querySelector('img.main');
+          const tempSrc = currentMain.src;
+          currentMain.src = this.src;
+          this.src = tempSrc;
+        };
+        subGallery.appendChild(img);
+      }
+
+      const backButton = document.createElement('div');
+      backButton.className = 'back-button';
+      backButton.innerText = 'Voltar à Galeria';
+      backButton.setAttribute('aria-label', 'Voltar à galeria principal');
+      backButton.onclick = function(e) {
+        e.stopPropagation();
+        toggleGallery(album);
+      };
+      album.appendChild(backButton);
+
+      album.appendChild(subGallery);
+      gallery.appendChild(album);
+    }
+
+    function toggleGallery(selected) {
+      const albums = document.querySelectorAll('.album');
+      const gallery = document.getElementById('gallery');
+      const isActive = selected.classList.contains('active');
+
+      albums.forEach(album => {
+        const mainImg = album.querySelector('img.main');
+        if (album !== selected && mainImg.dataset.original) {
+          mainImg.src = mainImg.dataset.original;
+        }
+        album.classList.remove('active');
+      });
+
+      gallery.classList.remove('active-view');
+
+      if (!isActive) {
+        selected.classList.add('active');
+        gallery.classList.add('active-view');
+      }
+    }
+
+    // Fechar o álbum ao clicar fora
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.album') && document.querySelector('.album.active')) {
+        toggleGallery(document.querySelector('.album.active'));
+      }
+    });
+
+    // Função para salvar mensagens com data
+    function saveMemory() {
+      const memory = document.getElementById('memory').value;
+      if (memory) {
+        const date = new Date();
+        const dateString = date.getFullYear() + '-' +
+                          ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+                          ('0' + date.getDate()).slice(-2) + ' ' +
+                          ('0' + date.getHours()).slice(-2) + ':' +
+                          ('0' + date.getMinutes()).slice(-2);
+        const memories = document.getElementById('memories');
+        const p = document.createElement('p');
+        p.innerHTML = `${memory}<span>${dateString}</span>`;
+        memories.appendChild(p);
+        document.getElementById('memory').value = '';
+        try {
+          localStorage.setItem('memories', memories.innerHTML);
+          console.log('Mensagem salva com sucesso!');
+        } catch (e) {
+          alert('Erro ao salvar a mensagem: armazenamento cheio ou outro problema.');
+        }
+        updateClearButton();
+      }
+    }
+
+    // Função para limpar memórias
+    function clearMemories() {
+      if (confirm('Tem certeza que deseja limpar todas as memórias?')) {
+        localStorage.removeItem('memories');
+        document.getElementById('memories').innerHTML = '';
+        updateClearButton();
+      }
+    }
+
+    // Atualizar visibilidade do botão "Limpar Memórias"
+    function updateClearButton() {
+      const clearButton = document.getElementById('clear-memories');
+      clearButton.style.display = localStorage.getItem('memories') ? 'inline-block' : 'none';
+    }
+
+    // Carregar memórias salvas
+    document.getElementById('memories').innerHTML = localStorage.getItem('memories') || '';
+    updateClearButton();
+  </script>
+</body>
+</html>
